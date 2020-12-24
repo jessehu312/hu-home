@@ -30,7 +30,7 @@
         setInterval(()=>{
             console.log('Get Location')
             navigator.geolocation.getCurrentPosition(pos => sendUpdate(pos));
-        }, 1000)
+        }, 10000)
     });
 
     socket.on('roster', function(data) {

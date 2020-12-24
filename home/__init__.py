@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 import os
 from datetime import datetime
 
+STALE_CLIENT_THRESHOLD = 30 # seconds
 APP_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_PATH = os.path.join(APP_PATH, 'templates/')
 
@@ -24,17 +25,15 @@ def handle_my_custom_event(json):
     print('received json: ' + str(json))
     json['timestamp'] = int(datetime.now().timestamp())
     clients[json['clientId']] = json
-    #print(clients)
-    del_client()
+    cleanup_clients()
     emit('roster', {'time': str(datetime.now().isoformat()), 'members': list(clients.values())})
 
-def del_client():
-  delete_clients = []
+def cleanup_clients():
+  stale_clients = []
   current_time = datetime.now().timestamp()
   for key,value in clients.items():
-    print(int(current_time - 10), value['timestamp'])
-    if int(current_time - 10) > value['timestamp']:
-      delete_clients.append(key)
-  for key in delete_clients:
+    if int(current_time - STALE_CLIENT_THRESHOLD) > value['timestamp']:
+      stale_clients.append(key)
+  for key in stale_clients:
     clients.pop(key)
 
