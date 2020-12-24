@@ -5,7 +5,6 @@ from datetime import datetime
 
 APP_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_PATH = os.path.join(APP_PATH, 'templates/')
-print(TEMPLATE_PATH)
 
 app = Flask(__name__, template_folder=TEMPLATE_PATH)
 app.config['SECRET_KEY'] = 'secret!'
@@ -18,7 +17,7 @@ if __name__ == '__main__':
 def client():
   return render_template('client.html')
 
-@socketio.on('my event')
+@socketio.on('update')
 def handle_my_custom_event(json):
     print('received json: ' + str(json))
-    emit('reply', {'time': str(datetime.now().isoformat())})
+    emit('roster', {'time': str(datetime.now().isoformat()), 'members': [{'clientId': 123}]})
