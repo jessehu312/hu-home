@@ -34,6 +34,6 @@ def cleanup_clients():
   for key,value in clients.items():
     if int(current_time - STALE_CLIENT_THRESHOLD) > value['timestamp']:
       stale_clients.append(key)
-  for key in stale_clients:
-    clients.pop(key)
+  for client in stale_clients:
+    clients.pop(client)
 
