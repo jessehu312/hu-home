@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 import os
 from datetime import datetime
@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
 @app.route('/')
 def client():
-  return render_template('client.html')
+  return render_template('client.html', **{'ip': request.remote_addr})
 
 @socketio.on('update')
 def handle_my_custom_event(json):

@@ -3,7 +3,7 @@
     var socket = io();
     var sent = 0;
     var clientId = Date.now();
-    var ip = "0.0.0.0";
+    var ip = "{{ip}}";
 
     sendUpdate = (pos) => {
         let {latitude, longitude, accuracy} = pos.coords;
@@ -11,6 +11,7 @@
         console.log({latitude, longitude, accuracy})
         socket.emit('update', {
             clientId,
+            ip,
             geo: {latitude, longitude, accuracy}, 
             timestamp: sent
         });
