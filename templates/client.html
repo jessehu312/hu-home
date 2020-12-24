@@ -19,9 +19,9 @@
 
     updateList = (clients) => {
         document.body.innerHTML = "";
-        for (const {clientId, geo, timestamp} of clients) {
+        for (const {clientId, ip, geo, timestamp} of clients) {
             div = document.createElement('div');
-            div.innerText = `${JSON.stringify({clientId, geo, time: new Date(timestamp)})}`;
+            div.innerText = `${JSON.stringify({clientId, ip, geo, time: new Date(timestamp)})}`;
             document.body.appendChild(div);
         }
     }
