@@ -1,0 +1,14 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+<script type="text/javascript" charset="utf-8">
+    var socket = io();
+    var sent = 0;
+    socket.on('connect', function() {
+        setInterval(()=>{
+            sent = (new Date()).toISOString();
+            socket.emit('my event', {data: 'I\'m connected!', time: sent});
+        }, 10000)
+    });
+    socket.on('reply', function(event){
+        document.body.innerText = `Sent: ${sent} /// Received: ${event.time}`;
+    });
+</script>
