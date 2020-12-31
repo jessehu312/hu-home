@@ -2,20 +2,19 @@
 Hu's home (pronounced - who's home) is an app to track if everybody in a family is home
 This repo contains Hu's home websocket server and a simple web client
 
-# Setup
+# Local Development
 
 ## Initial
 ```
-py -3 -m venv venv
+python -m pip install --user virtualenv
+virtualenv venv
 venv\Scripts\activate
-pip install 
+pip install -r requirements.txt
 ```
 
 ## Running Server
 ```
 venv\Scripts\activate
-set FLASK_APP=hu-home
-set FLASK_ENV=development
 flask run
 ```
 
