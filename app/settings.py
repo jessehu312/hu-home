@@ -34,3 +34,5 @@ FIREBASE_CLIENT_CONFIG = {
   'appId': os.getenv('APP_ID'),
   'measurementId': os.getenv('MEASUREMENT_ID')
 }
+
+RADAR_PUBLISHABLE_KEY = os.getenv('RADAR_PUBLISHABLE_KEY')
