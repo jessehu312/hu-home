@@ -8,7 +8,7 @@ class User(db.Model):
     firebase_id = db.Column(db.Integer(), nullable=True)
 
     def __init__(self, username, firebase_id):
-        self.username = username
+        self.email = username
         self.firebase_id = firebase_id
 
     def __repr__(self):
