@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from app import settings
 from firebase_admin import auth
 from app.models.user import User
@@ -16,9 +16,8 @@ def list_users():
 def add_user(id, email):
     if not User.query.filter_by(firebase_id=id).first():
         user = User(username = email, firebase_id = id)
-        session = db.session
-        session.add(user)
-        session.commit()
+        db.session.add(user)
+        db.session.commit()
     return list_users()
 
 @blueprint.route('/get-user', methods=['POST'])
