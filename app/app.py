@@ -1,5 +1,5 @@
 import os
-
+import firebase_admin
 from flask import Flask, render_template
 from . import settings, controllers, models, routes
 from .database import db
@@ -14,6 +14,7 @@ def create_app(config_object=settings):
 
     register_database(app)
     register_socketio(app)
+    register_firebase(app)
     register_blueprints(app)
     register_errorhandlers(app)
     return app
@@ -28,6 +29,10 @@ def register_socketio(app):
     socketio = init_socketio(app)
     if __name__ == "__main__":
         socketio.run(app)
+
+def register_firebase(app):
+    creds = firebase_admin.credentials.Certificate(settings.FIREBASE_ADMIN_CONFIG)
+    firebase_admin.initialize_app(creds)
 
 def register_blueprints(app):
     app.register_blueprint(controllers.home.blueprint)
