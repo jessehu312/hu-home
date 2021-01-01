@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask, render_template
-from . import settings, controllers, models
+from . import settings, controllers, models, routes
 from .database import db
 from .socketio import init_socketio
 
@@ -31,6 +31,7 @@ def register_socketio(app):
 
 def register_blueprints(app):
     app.register_blueprint(controllers.home.blueprint)
+    app.register_blueprint(routes.api.blueprint)
 
 def register_errorhandlers(app):
     @app.errorhandler(401)
