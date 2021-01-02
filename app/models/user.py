@@ -1,15 +1,26 @@
 from app.database import db
 
+cols = ('id', 'email', 'name', 'family_id')
+
 class User(db.Model):
     __tablename__ = 'user'
 
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.String(80), primary_key=True)
     email = db.Column(db.String(80), nullable=False)
-    firebase_id = db.Column(db.Integer(), nullable=True)
+    name = db.Column(db.String(80), nullable=True)
+    family_id = db.Column(db.Integer(), nullable=True)
 
     def __init__(self, username, firebase_id):
         self.email = username
-        self.firebase_id = firebase_id
+        self.id = firebase_id
 
     def __repr__(self):
         return "<User: {}>".format(self.username)
+
+    def to_dict(self):
+        d = {}
+        for k in cols:
+            val = getattr(self, k)
+            if val:
+                d[k] = val
+        return d

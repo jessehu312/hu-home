@@ -1,8 +1,10 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, abort
 from app import settings
 from firebase_admin import auth
 from app.models.user import User
+from app.models.family import Family
 from app.database import db
+from app.services.radar import radar_client
 
 blueprint = Blueprint('api', __name__, url_prefix='/api')
 
@@ -14,20 +16,72 @@ def client_config():
     }
 
 def list_users():
-    return list(map(lambda row: {'id': row.id, 'username': row.email, 'firebase_id': row.firebase_id}, User.query.all()))
+    return list(map(lambda row: row.to_dict(), User.query.all()))
 
 def add_user(id, email):
-    if not User.query.filter_by(firebase_id=id).first():
+    user = User.query.get(id)
+    if not user:
         user = User(username = email, firebase_id = id)
         db.session.add(user)
         db.session.commit()
-    return list_users()
+    return user
 
-@blueprint.route('/get-user', methods=['POST'])
+@blueprint.route('/get-user')
 def get_user():
-    id_token = request.json.get('token')
-    decoded_token = auth.verify_id_token(id_token)
+    try:
+        id_token = request.headers.get('Authorization', '').split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+    except:
+        abort(401)
+
     uid = decoded_token['uid']
     email = decoded_token['email']
-    decoded_token['listUsers'] = add_user(uid, email)
-    return decoded_token, 200
+
+    me = add_user(uid, email)
+    profile = {
+        'me': me.to_dict(),
+        'family': Family.query.get(me.family_id).to_dict()
+    }
+    return {'debug': decoded_token, 'profile': profile}, 200
+
+@blueprint.route('/family', methods=['POST'])
+def family():
+    try:
+        id_token = request.headers.get('Authorization', '').split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        user = User.query.get(decoded_token['uid'])
+    except Exception as e:
+        print(e)
+        abort(401)
+
+    if user and not user.family_id:
+        payload = request.json
+        family = Family(payload)
+        user.family_id = family.id
+        db.session.add(family)
+        search_result = radar_client.search.autocomplete(
+            query=f'{family.address}, {family.city}, {family.zip}, {payload["country"]}',
+            near=[payload['latitude'], payload['longitude']]
+            )
+
+        if not search_result:
+            abort(404)
+        address = search_result[0]
+        create_result = radar_client.geofences.create({
+            'description': family.name,
+            'tag': 'home',
+            'externalId': family.id,
+            'type': 'circle',
+            'radius': 100,
+            'coordinates': [address.longitude, address.latitude],
+            'enabled': True
+        })
+        family.geofence_id = create_result._id
+        db.session.commit()
+        return { 'family_id': family.id }, 200
+    
+    return abort(409)
+
+@blueprint.route('/track', methods=['POST'])
+def track():
+    pass
