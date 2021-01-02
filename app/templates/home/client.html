@@ -6,10 +6,19 @@
     <div>Loading...</div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
     <script type="text/javascript" charset="utf-8">
-        var socket = io();
         var sent = 0;
         var clientId = Date.now();
         var ip = "{{ip}}";
+        var socket = io('/', {
+            transportOptions: {
+                polling: {
+                    extraHeaders: {
+                        'x-client-id': clientId,
+                        'x-family-id': 'a9cfcf41-6ca8-4a21-922b-68a06339be3a'
+                    }
+                }
+            }
+        });
 
         sendUpdate = (pos) => {
             let {latitude, longitude, accuracy} = pos.coords;
@@ -25,9 +34,14 @@
 
         updateList = (clients) => {
             document.body.innerHTML = "";
-            for (const {clientId, ip, geo, timestamp} of clients) {
+            for (const id of Object.keys(clients)) {
+                if (!clients[id]) {
+                    continue;
+                }
+                const {geo, timestamp} = clients[id];
+                let ip = clients[id];
                 div = document.createElement('div');
-                div.innerText = `${JSON.stringify({clientId, ip, geo, time: new Date(timestamp)})}`;
+                div.innerText = `${JSON.stringify({[id]: {ip, geo, time: new Date(timestamp*1000)}})}`;
                 document.body.appendChild(div);
             }
         }
@@ -36,7 +50,7 @@
             setInterval(()=>{
                 console.log('Get Location')
                 navigator.geolocation.getCurrentPosition(pos => sendUpdate(pos));
-            }, 10000)
+            }, 5000)
         });
 
         socket.on('roster', function(data) {
