@@ -38,10 +38,12 @@ def get_user():
     email = decoded_token['email']
 
     me = add_user(uid, email)
+    family = Family.query.get(me.family_id)
     profile = {
         'me': me.to_dict(),
-        'family': Family.query.get(me.family_id).to_dict()
     }
+    if family:
+        profile['family'] = family.to_dict()
     return {'debug': decoded_token, 'profile': profile}, 200
 
 @blueprint.route('/family', methods=['POST'])
