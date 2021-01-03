@@ -46,7 +46,7 @@ def register_handlers(socketio):
 
     json['timestamp'] = int(datetime.now().timestamp())
     clients[user_id] = json
-    cleanup_clients()
+    # cleanup_clients()
     
     emit('roster', {
       'id': family_id,
