@@ -3,7 +3,7 @@ import firebase_admin
 from flask import Flask, render_template
 from . import settings, controllers, models, routes
 from .database import db
-from .socketio import init_socketio
+from .socketio import init_socketio, blueprint
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,6 +37,7 @@ def register_firebase(app):
 def register_blueprints(app):
     app.register_blueprint(controllers.home.blueprint)
     app.register_blueprint(routes.api.blueprint)
+    app.register_blueprint(blueprint)
 
 def register_errorhandlers(app):
     @app.errorhandler(401)

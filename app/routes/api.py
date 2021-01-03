@@ -91,6 +91,3 @@ def family():
     
     return abort(409)
 
-@blueprint.route('/track', methods=['POST'])
-def track():
-    pass

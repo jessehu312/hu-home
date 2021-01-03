@@ -22,7 +22,7 @@ class Family(db.Model):
             setattr(self, key, args[key])
 
     def __repr__(self):
-        return "<User: {}>".format(self.username)
+        return "<Family: {}>".format(self.address)
 
     def to_dict(self):
         d = {}
