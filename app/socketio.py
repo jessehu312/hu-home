@@ -1,9 +1,12 @@
 import os
-from flask import request
+from flask import request, Blueprint
 from flask_socketio import SocketIO, emit, join_room, leave_room, close_room
 from datetime import datetime
+from app.services.radar import radar_client
+from threading import Timer
 
 STALE_CLIENT_THRESHOLD = 30 # seconds
+blueprint = Blueprint('update', __name__, url_prefix='/update')
 
 def init_socketio(app):
   socketio = SocketIO()
@@ -47,7 +50,9 @@ def register_handlers(socketio):
     json['timestamp'] = int(datetime.now().timestamp())
     clients[user_id] = json
     # cleanup_clients()
-    
+    send_roster(family_id)
+
+  def send_roster(family_id):    
     emit('roster', {
       'id': family_id,
       'time': str(datetime.now().isoformat()), 
@@ -62,3 +67,35 @@ def register_handlers(socketio):
         stale_clients.append(key)
     for client in stale_clients:
       clients.pop(client)
+
+  def remove_client(user_id, family_id):
+    families[family_id].remove(user_id)
+    if family_id in families and not families[family_id]:
+      families.pop(family_id)
+
+    clients.pop(user_id)
+
+  @blueprint.route('/event', methods=['POST'])
+  def track():
+    try:
+      payload = request.json['event']
+      if 'user_id' in payload['user']:
+        user_id = payload['user']['userId']
+      else:
+        user = radar_client.users.get(payload['user']['_id'])
+        user_id = user['userId']
+
+      family_id = Users.query.get(user_id).family_id
+      clients[user_id] = payload
+      if family_id not in families:
+        families[family_id] = {user_id}
+      else:
+        families[family_id].add(user_id)
+      send_roster(family_id)
+      
+      t = Timer(10.0, remove_client, args=[user_id, family_id])
+    except Exception as e:
+      print(e)
+
+    return 'OK', 200
+      
