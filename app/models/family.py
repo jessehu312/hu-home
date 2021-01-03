@@ -1,7 +1,7 @@
 from app.database import db
 from uuid import uuid4
 
-cols = ('name', 'address', 'city', 'zip', 'phone', 'geofence_id')
+cols = ('id', 'name', 'address', 'city', 'zip', 'phone', 'geofence_id')
 
 class Family(db.Model):
     __tablename__ = 'family'
