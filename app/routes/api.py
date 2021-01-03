@@ -15,8 +15,8 @@ def client_config():
         'radar': settings.RADAR_PUBLISHABLE_KEY
     }
 
-def list_users():
-    return list(map(lambda row: row.to_dict(), User.query.all()))
+def list_users(fid):
+    return list(map(lambda row: row.to_dict(), User.query.filter_by(family_id=fid)))
 
 def add_user(id, email):
     user = User.query.get(id)
@@ -44,6 +44,7 @@ def get_user():
     }
     if family:
         profile['family'] = family.to_dict()
+        profile['members'] = list_users(me.family_id)
     return {'debug': decoded_token, 'profile': profile}, 200
 
 @blueprint.route('/family', methods=['POST'])
@@ -60,6 +61,7 @@ def family():
         payload = request.json
         family = Family(payload)
         user.family_id = family.id
+        user.name = payload.get('name')
         db.session.add(family)
         search_result = radar_client.search.autocomplete(
             query=f'{family.address}, {family.city}, {family.zip}, {payload["country"]}',
@@ -79,7 +81,12 @@ def family():
             'enabled': True
         })
         family.geofence_id = create_result._id
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            radar_client.geofences.delete(create_result._id)
+            abort(500)
         return { 'family_id': family.id }, 200
     
     return abort(409)
